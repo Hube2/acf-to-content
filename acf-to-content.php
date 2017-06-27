@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 0.0.2
+		Version: 0.0.3
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -84,15 +84,23 @@
 		
 		
 		public function __construct() {
+			// when an acf field is altered
 			add_filter('acf/update_field', array($this, 'update_field'), 20);
+			// when and acf field is deleted
 			add_action('acf/delete_field', array($this, 'delete_field'));
 			
+			// allow filtering of the field types to copy to post_content
 			add_filter('acf-to-content/field-types', array($this, 'get_field_types'), 1, 1);
 			
+			// remove post_meta from db for any field that will be copied before ACF saves new values
 			add_action('acf/save_post', array($this, 'pre_save_delete'), 1);
+			
+			// after acf saves values, copy to post_content
 			add_action('acf/save_post', array($this, 'save_post'), 20);
 			
+			// remove added content before displaying on front end of site
 			add_filter('the_content', array($this, 'remove_acf_content'), 1);
+			// remove added content from standard WP content editor
 			add_filter('the_editor_content', array($this, 'remove_acf_content'), 1);
 		} // end public function __construct
 		
@@ -196,7 +204,9 @@
 								WHERE post_id = "'.$post_id.'"
 									AND meta_key IN ("'.implode('","', $delete_keys).'")';
 			$wpdb->query($query);
-			clean_post_cache($post_id);
+			//clean_post_cache($post_id);
+			wp_cache_delete($post_id, 'post_meta');
+			get_post_meta($post_id);
 			
 		} // end public function pre_save_delete
 		
