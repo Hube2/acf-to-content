@@ -93,7 +93,7 @@
 			add_filter('acf-to-content/field-types', array($this, 'get_field_types'), 1, 1);
 			
 			// remove post_meta from db for any field that will be copied before ACF saves new values
-			add_action('acf/save_post', array($this, 'pre_save_delete'), 1);
+			add_action('acf/save_post', array($this, 'pre_save_delete'), 2);
 			
 			// after acf saves values, copy to post_content
 			add_action('acf/save_post', array($this, 'save_post'), 20);
