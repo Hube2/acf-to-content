@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 0.0.3
+		Version: 0.0.4
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -206,7 +206,7 @@
 			$wpdb->query($query);
 			//clean_post_cache($post_id);
 			wp_cache_delete($post_id, 'post_meta');
-			get_post_meta($post_id);
+			//get_post_meta($post_id);
 			
 		} // end public function pre_save_delete
 		
