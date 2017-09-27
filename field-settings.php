@@ -10,7 +10,7 @@
 	class acf_to_post_content_field_settings {
 		
 		public function __construct() {
-			add_action('init', array($this, 'add_actions'), 20);
+			add_action('acf/init', array($this, 'add_actions'), 20);
 		} // end public function __construct
 		
 		public function add_actions() {
@@ -19,13 +19,15 @@
 			// active handlings
 			global $acf_to_post_content;
 			$active_handlers = $acf_to_post_content->get_active_handlings();
-			foreach ($acf_types as $type => $field) {
-				if (isset($filtered_types[$type]) && 
-						in_array($filtered_types[$type]['handling'], $active_handlers)) {
-					$function = $filtered_types[$type]['handling'];
-					add_action('acf/render_field_settings/type='.$type, array($this, $function), 1);
-				} // end if isset type
-			} // end foreach acfr types
+			foreach ($acf_types as $section) {
+				foreach ($section as $type => $field) {
+					if (isset($filtered_types[$type]) && 
+							in_array($filtered_types[$type]['handling'], $active_handlers)) {
+						$function = $filtered_types[$type]['handling'];
+						add_action('acf/render_field_settings/type='.$type, array($this, $function), 1);
+					} // end if isset type
+				} // end foreach acfr types
+			} // end foreach section
 		} // end public function add_actions
 		
 		public function all($field) {
