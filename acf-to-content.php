@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 0.0.5
+		Version: 0.0.6
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -103,7 +103,18 @@
 			add_filter('the_content', array($this, 'remove_acf_content'), 1);
 			// remove added content from standard WP content editor
 			add_filter('the_editor_content', array($this, 'remove_acf_content'), 1);
+			
+			
+			// add filters to allow saving/updating to be called from custom location
+			add_action('wpia_custom_post_saved', array($this, 'wpia_post_saved'));
+			add_action('acf-to-content/save_post', array($this, 'wpia_post_saved'));
 		} // end public function __construct
+		
+		public function wpia_post_saved($post_id) {
+			// this function is run when a post is imported
+			$this->save_post($post_id);
+			
+		} // end public function wpia_post_saved
 		
 		public function get_active_handlings() {
 			return $this->active_handlings;
