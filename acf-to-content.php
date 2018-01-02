@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 0.0.6
+		Version: 0.0.7
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -169,7 +169,7 @@
 		
 		public function pre_save_delete($post_id) {
 			
-			if ($_POST['_acfchanged'] == 0 || !is_numeric($post_id)) {
+			if (!isset($_POST['_acfchanged']) || $_POST['_acfchanged'] == 0 || !is_numeric($post_id)) {
 				// no acf field change, no need to run this
 				return;
 			}
@@ -285,7 +285,7 @@
 			// this needs to run every time because acf content
 			// is removed from the default content editor before
 			// it is displayed for editing
-			if ($_POST['_acfchanged'] == 0) {
+			if (!isset($_POST['_acfchanged']) || $_POST['_acfchanged'] == 0) {
 				// no acf field change
 				// but nothing was retreaved during the pre save phase
 				// so we need to populate the needed data
