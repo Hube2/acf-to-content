@@ -24,6 +24,17 @@
 	
 	class acf_to_post_content {
 		
+		// this field will hold content that needs to be added to the post_content
+		// at is created so that after the post has been saved this update can happen
+		// it will store multiple posts so that processing on any post can occur
+		private $content = array();
+		
+		// should update be done
+		// if nothing was saved by ACF then nothing should be updated in content
+		private $do_updates = array();
+		
+		// this is an array of fucntion names that match
+		// the macth values in $field_types => $field_type => 'handling'
 		private $active_handlings = array('text');
 		
 		// this is a list of known field types 
@@ -68,298 +79,139 @@
 			//'clone' => array('handling' => 'clone')
 		);
 		
-		// list of fields to copy 
-		// [meta_key(field name)] => field_key
-		private $field_list = array();
-		
-		// field settings for each field from acf
-		// [field_key] => field settings
-		private $acf_fields = array();
-		
-		// field content to copy
-		// [meta_key(field name)] => content
-		private $field_content = array();
-		
-		// field names to get content for
-		private $field_name_list = array();
-		
-		
 		public function __construct() {
-			// when an acf field is altered
-			add_filter('acf/update_field', array($this, 'update_field'), 20);
-			// when and acf field is deleted
-			add_action('acf/delete_field', array($this, 'delete_field'));
+			
+			// run update value on every field
+			add_action('acf/update_value', array($this, 'update_value'), 999999, 3);
 			
 			// allow filtering of the field types to copy to post_content
 			add_filter('acf-to-content/field-types', array($this, 'get_field_types'), 1, 1);
 			
-			// remove post_meta from db for any field that will be copied before ACF saves new values
-			add_action('acf/save_post', array($this, 'pre_save_delete'), 2);
-			
 			// after acf saves values, copy to post_content
-			add_action('acf/save_post', array($this, 'save_post'), 20);
+			add_action('acf/save_post', array($this, 'save_post'), 999999);
 			
 			// remove added content before displaying on front end of site
 			add_filter('the_content', array($this, 'remove_acf_content'), 1);
+			
 			// remove added content from standard WP content editor
-			add_filter('the_editor_content', array($this, 'remove_acf_content'), 1);
+			//add_filter('the_editor_content', array($this, 'remove_acf_content'), 1);
 			
+			// WPAI actions
+			//add_action('pmxi_update_post_meta', array($this, 'pmxi_update_post_meta'), 10, 3);
 			
-			// add filters to allow saving/updating to be called from custom location
-			add_action('wpia_custom_post_saved', array($this, 'wpia_post_saved'));
-			add_action('acf-to-content/save_post', array($this, 'wpia_post_saved'));
 		} // end public function __construct
 		
-		public function wpia_post_saved($post_id) {
-			// this function is run when a post is imported
-			$this->save_post($post_id);
-			
-		} // end public function wpia_post_saved
+		public function pmxi_update_post_meta($post_id, $meta_key, $meta_value) {
+			$values = array(
+				'post_id' => $post_id,
+				'meta_key' => $meta_key,
+				'meta_value' => $meta_value
+			);
+			$this->write_to_file($values);
+		} // end public function pmxi_update_post_meta
 		
-		public function get_active_handlings() {
-			return $this->active_handlings;
-		} // end public function get_active_handlings
+		public function save_post($post_id) {
+			// this function will add acf content to post content if it exists
+			
+			// test to see if acf values were updated
+			if (!isset($this->do_updates[$post_id])) {
+				// no updates for this post
+				return;
+			}
+			$this->content[$post_id] = trim($this->content[$post_id]);
+			
+			$post = get_post($post_id);
+			
+			// remove any previous ACF fields from post content
+			
+			$post_content = $this->remove_acf_content($post->post_content);
+			
+			// if there is post content saved add it to the content
+			if (!empty($this->content[$post_id])) {
+				$post_content .= "\r\n".'<!-- START SSI ACF TO CONTENT -->'."\r\n".
+				                 '<div style="display:none;">'.$this->content[$post_id].'</div>'."\r\n".
+				                 '<!-- END SSI ACF TO CONTENT -->';
+				
+			}
+			
+			$post->post_content = $post_content;
+			
+			// remove this action
+			remove_filter('acf/save_post', array($this, 'save_post'), 999999);
+			
+			// update post
+			wp_update_post($post);
+			
+			// re-add this action
+			add_action('acf/save_post', array($this, 'save_post'), 999999);
+			
+		} // end public function save_post
+		
+		public function update_value($value, $post_id, $field) {
+			// this function is called every time ACF updates a field value
+			
+			// this only works on posts
+			if (!is_numeric($post_id)) {
+				return $value;
+			}
+			
+			if (!isset($field['to_content']) || !$field['to_content']) {
+				// this field is not being added to content
+				// we can skip the rest
+				return $value;
+			}
+			
+			// process content and add it to $this->content[$post_id]
+			$filtered_types = apply_filters('acf-to-content/field-types', array());
+			
+			if (isset($filtered_types[$field['type']])) {
+				$handling = $filtered_types[$field['type']]['handling'];
+			}
+			if (!$handling) {
+				// no handling set for this field type
+				return $value;
+			}
+			if (!isset($this->content[$post_id])) {
+				$this->content[$post_id] = '';
+			}
+			$this->content[$post_id] .= ' '.apply_filters('acf-to-content/process', $value, $handling);
+			$this->do_updates[$post_id] = $post_id;
+			
+			return $value;
+		} // end public function update_value
 		
 		public function get_field_types($value=array()) {
 			return $this->field_types;
 		} // end public function get_field_types
 		
-		public function delete_field($field) {
-			$field_key_list = get_option('acf_to_content_key_list', array());
-			$key = $field['key'];
-			if (isset($field_key_list[$key])) {
-				unset($field_key_list[$key]);
-				update_option('acf_to_content_key_list', $field_key_list, true);
-			}
-		} // end public function delete_field
-		
-		public function update_field($field) {
-			//echo '<pre>'; print_r($field); echo '</pre>';
-			$field_key_list = get_option('acf_to_content_key_list', array());
-			$change = false;
-			if (isset($field['to_content'])) {
-				$post_id = $field['ID'];
-				//$value = $field['to_content'];
-				//$meta_key = 'acf_to_content_setting';
-				
-				// flag this field with value
-				//update_post_meta($post_id, $meta_key, $value);
-				if ($field['to_content'] && !isset($field_key_list[$field['key']])) {
-					$change = true;
-					$field_key_list[$field['key']] = $field['key'];
-				} elseif (!$field['to_content'] && isset($field_key_list[$field['key']])) {
-					$change = true;
-					unset($field_key_list[$field['key']]);
-				}
-				
-				// set field key to make it easier to find
-				//$value = $field['key'];
-				//$meta_key = 'acf_to_content_key';
-				//update_post_meta($post_id, $meta_key, $value);
-				
-			} elseif (isset($field_key_list[$field['key']])) {
-				$change = true;
-				unset($field_key_list[$field['key']]);
-			}
-			if ($change) {
-				update_option('acf_to_content_key_list', $field_key_list, true);
-			}
-			return $field;
-		} // end public function update_field
-		
-		public function pre_save_delete($post_id) {
-			
-			if (!isset($_POST['_acfchanged']) || $_POST['_acfchanged'] == 0 || !is_numeric($post_id)) {
-				// no acf field change, no need to run this
-				return;
-			}
-			
-			// in order to make sure that content is correct
-			// content needs to be deleted before ACF update
-			// any fields that may be removed because of repeaters
-			// or conditonal logic must be removed
-			// the best way to accomplish this is to just
-			// delete all exsiting content for fields that need to
-			// be moved to content
-			
-			// just in case this happens more than once, clear any previous results
-			$this->acf_field = array();
-			$this->field_list = array();
-			$this->field_content = array();
-			$this->field_name_list = array();
-			
-			// get filtered field types
-			$field_types = apply_filters('acf-to-content/field-types', array());
-			
-			$field_key_list = get_option('acf_to_content_key_list', array());
-			
-			if (empty($field_key_list)) {
-				// no fields to copy
-				return;
-			}
-			// store list of all field keys and field settings from above query
-			$field_keys = $this->get_field_keys();
-			
-			if (!count($field_keys)) {
-				return;
-			}
-			
-			$delete_keys = $this->get_delete_keys($post_id, $field_keys);
-			
-			if (!$delete_keys) {
-				return;
-			}
-			
-			global $wpdb;
-			$delete_keys = $wpdb->_escape($delete_keys);
-			$query = 'DELETE FROM '.$wpdb->postmeta.'
-								WHERE post_id = "'.$post_id.'"
-									AND meta_key IN ("'.implode('","', $delete_keys).'")';
-			$wpdb->query($query);
-			//clean_post_cache($post_id);
-			wp_cache_delete($post_id, 'post_meta');
-			//get_post_meta($post_id);
-			
-		} // end public function pre_save_delete
-		
-		private function get_field_keys() {
-			
-			$field_keys = array();
-			
-			$field_key_list = get_option('acf_to_content_key_list', array());
-			
-			if (empty($field_key_list)) {
-				// no fields to copy
-				return $field_keys;
-			}
-			
-			foreach ($field_key_list as $field_key) {
-				//echo $field_id;
-				$field = acf_get_field($field_key);
-				
-				if (!$field) {
-					continue;
-				}
-				
-				$field_keys[] = $field['key'];
-				$this->acf_fields[$field['key']] = $field;
-				wp_cache_delete('get_field/key='.$field['key'], 'acf');
-				wp_cache_delete('get_field/ID='.$field['ID'], 'acf');
-			}
-			
-			return $field_keys;
-			
-		} // end private function get_field_keys
-		
-		private function get_delete_keys($post_id, $field_keys) {
-			global $wpdb;
-			$delete_keys = array();
-			// get list of meta keys matching field keys
-			$field_keys = $wpdb->_escape($field_keys);
-			$query = 'SELECT meta_key, meta_value
-								FROM '.$wpdb->postmeta.'
-								WHERE post_id = "'.$post_id.'"
-									AND meta_value IN ("'.implode('","', $field_keys).'")';
-			$fields = $wpdb->get_results($query, 'ARRAY_A');
-			
-			if (!count($fields)) {
-				return $delete_keys;
-			}
-			
-			// store fields in field list and delete content
-			foreach ($fields as $field) {
-				$delete_keys[] = $field['meta_key'];
-				$delete_keys[] = substr($field['meta_key'], 1);
-				$this->field_list[substr($field['meta_key'], 1)] = $field['meta_value'];
-				$this->field_name_list[] = substr($field['meta_key'], 1);
-			}
-			return $delete_keys;
-		} // end private function get_delete_keys
-		
-		public function save_post($post_id) {
-			
-			if (!is_numeric($post_id)) {
-				return;
-			}
-			
-			// this needs to run every time because acf content
-			// is removed from the default content editor before
-			// it is displayed for editing
-			if (!isset($_POST['_acfchanged']) || $_POST['_acfchanged'] == 0) {
-				// no acf field change
-				// but nothing was retreaved during the pre save phase
-				// so we need to populate the needed data
-				$field_keys = $this->get_field_keys();
-				// call delete keys but do not use
-				$delete_keys = $this->get_delete_keys($post_id, $field_keys);
-			}
-			// this is the function that gets all of the acf field content
-			// and adds it to post_content
-			$content = $this->get_content($post_id);
-			
-			$post = get_post($post_id);
-			
-			$post_content = $this->remove_acf_content($post->post_content);
-			$post_content .= "\r\n".'<!-- START SSI ACF TO CONTENT -->'."\r\n".
-											 '<div style="display:none;">'.$content.'</div>'."\r\n".
-											 '<!-- END SSI ACF TO CONTENT -->';
-			$post->post_content = $post_content;
-			
-			
-			// remove filters to prevent infinite loop
-			remove_filter('acf/save_post', array($this, 'pre_save_delete'), 1);
-			remove_filter('acf/save_post', array($this, 'save_post'), 20);
-			
-			// update post
-			wp_update_post($post);
-			
-			// add filters back in
-			add_action('acf/save_post', array($this, 'pre_save_delete'), 1);
-			add_action('acf/save_post', array($this, 'save_post'), 20);
-			
-		} // end public function save_post
+		public function get_active_handlings() {
+			return $this->active_handlings;
+		} // end public function get_active_handlings
 		
 		public function remove_acf_content($content) {
 			return trim(preg_replace('#<!-- START SSI ACF TO CONTENT.*END SSI ACF TO CONTENT -->#is', 
 															'', $content));
 		} // end public function remove_content
 		
-		private function get_content($post_id) {
-			$content = '';
-			if (!count($this->field_name_list)) {
-				return $content;
+		private function write_to_file($value, $comment='') {
+			// this function for testing & debuggin only
+			$file = dirname(__FILE__).'/-data-'.date('Y-m-d-h-i').'.txt';
+			$handle = fopen($file, 'a');
+			ob_start();
+			if ($comment) {
+				echo $comment.":\r\n";
 			}
-			global $wpdb;
-			$fields = $wpdb->_escape($this->field_name_list);
-			$query = 'SELECT meta_key, meta_value 
-								FROM '.$wpdb->postmeta.'
-								WHERE post_id = "'.$post_id.'"
-									AND meta_key IN ("'.implode('","', $fields).'")';
-			$results = $wpdb->get_results($query, 'ARRAY_A');
-			
-			if (!count($results)) {
-				return $content;
+			if (is_array($value) || is_object($value)) {
+				print_r($value);
+			} elseif (is_bool($value)) {
+				var_dump($value);
+			} else {
+				echo $value;
 			}
-			
-			$filtered_types = apply_filters('acf-to-content/field-types', array());
-			
-			foreach ($results as $result) {
-				$field_name = $result['meta_key'];
-				$value = $result['meta_value'];
-				$field_key = $this->field_list[$field_name];
-				$field_type = $this->acf_fields[$field_key]['type'];
-				$handling = false;
-				if (isset($filtered_types[$field_type])) {
-					$handling = $filtered_types[$field_type]['handling'];
-				}
-				if (!$handling) {
-					// no handling set for this field type
-					continue;
-				}
-				$content .= ' '.apply_filters('acf-to-content/process', $value, $handling); 
-			}
-			return $content;
-		} // end private function get_content
+			echo "\r\n\r\n";
+			fwrite($handle, ob_get_clean());
+			fclose($handle);
+		} // end private function write_to_file
 		
 	} // end class acf_to_post_content
 	
