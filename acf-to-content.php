@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 0.0.7
+		Version: 1.0.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -97,18 +97,27 @@
 			//add_filter('the_editor_content', array($this, 'remove_acf_content'), 1);
 			
 			// WPAI actions
-			//add_action('pmxi_update_post_meta', array($this, 'pmxi_update_post_meta'), 10, 3);
+			add_action('pmxi_acf_custom_field', array($this, 'pmxi_acf_custom_field'), 999999, 3);
+			add_action('pmxi_saved_post', array($this, 'save_post'), 999999, 1);
+			
+			// custom filters/actions for others to use
+			add_action('acf_to_content/update_value', array($this, 'pmxi_acf_custom_field'), 999999, 3);
+			add_action('acr_to_content/save_post', array($this, 'save_post'), 999999, 1);
 			
 		} // end public function __construct
 		
-		public function pmxi_update_post_meta($post_id, $meta_key, $meta_value) {
+		public function pmxi_acf_custom_field($value, $post_id, $field_name) {
 			$values = array(
 				'post_id' => $post_id,
-				'meta_key' => $meta_key,
-				'meta_value' => $meta_value
+				'field_name' => $field_name,
+				'value' => $value
 			);
-			$this->write_to_file($values);
-		} // end public function pmxi_update_post_meta
+			$field_object = get_field_object($field_name, $post_id);
+			if ($field_object) {
+				$value = $this->update_value($value, $post_id, $field_object);
+			}
+			return $value;
+		} // end public function pmxi_acf_custom_field
 		
 		public function save_post($post_id) {
 			// this function will add acf content to post content if it exists
@@ -192,26 +201,6 @@
 			return trim(preg_replace('#<!-- START SSI ACF TO CONTENT.*END SSI ACF TO CONTENT -->#is', 
 															'', $content));
 		} // end public function remove_content
-		
-		private function write_to_file($value, $comment='') {
-			// this function for testing & debuggin only
-			$file = dirname(__FILE__).'/-data-'.date('Y-m-d-h-i').'.txt';
-			$handle = fopen($file, 'a');
-			ob_start();
-			if ($comment) {
-				echo $comment.":\r\n";
-			}
-			if (is_array($value) || is_object($value)) {
-				print_r($value);
-			} elseif (is_bool($value)) {
-				var_dump($value);
-			} else {
-				echo $value;
-			}
-			echo "\r\n\r\n";
-			fwrite($handle, ob_get_clean());
-			fclose($handle);
-		} // end private function write_to_file
 		
 	} // end class acf_to_post_content
 	
