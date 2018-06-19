@@ -31,5 +31,55 @@ Every field that is saved by ACF triggers the action `acf/update_value`. This ca
 When ACF is finsished saveing the post the `acf/save_post` action is triggerd. This triggers this plugin to add any stored 
 values for the post to "post_content"
 
-## Work with WP All Import ACF Add On
+## Works with WP All Import ACF Add On
 This plugin also includes all the neccessary integration to work with WP All Import and the ACF Add On
+
+## Using in your own code
+
+Before attempting to use create code to integrate this is some other way the first thing you need to understand is 
+the process that you must use. The only field values that will be added to the post_content for searching are values 
+currently being updated. This means that you must update all fields that need to be added to the post_content.
+
+Let's look at an example. Suppose you have to text fields and you want both of these fields to be added to the post_content.
+You must update both of these fields even if no value is being changed. So let's also say that for some reason you are
+updating 1 of the fields dynamically in php but the other field is not being updated, in this case you must still update
+the second field.
+
+```
+// php example
+// the first text field you want to update
+$value = 'set a value dynamically using any method you want';
+update_field('field_12345678', $value, $post_id);
+
+// now get the value from the other field and update it
+$value = get_field('second_text_field', $post_id);
+update_value('second_text_field', $post_id);
+```
+Calling `update_field()` triggers this plugin to add the value to the content that will be added to the post_content. 
+Once you have updated all of the values then you must trigger this plugin to store that content. A special action hook 
+has been added to this plugin for that purpose.
+```
+do_action('acf_to_content/save_post', $post_id);
+```
+
+*Updating values by hook*
+You can also update values using a hook. Using this hook will not cause ACF to update the value and will instead cause
+this plugin to add the value that will be added to the post_content.
+`
+$value = apply_filters($value, $post_id, $field_name);
+`
+$field_name can be the field key or the field name. Please not that the use of field key VS field name follows the same
+rules as those for ACF. If the field does not already have a value then you must use the field key. Again, this does not 
+cause ACF to actually update the value. This can be used to replace the code in the first examples
+```
+// the first text field you want to update
+$value = 'set a value dynamically using any method you want';
+update_field('field_12345678', $value, $post_id);
+
+// now get the value from the other field and update it
+$value = get_field('second_text_field', $post_id);
+$value = apply_filters($value, $post_id, 'second_text_field');
+
+// trigger the update
+do_action('acf_to_content/save_post', $post_id);
+```
