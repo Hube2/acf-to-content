@@ -120,18 +120,7 @@
 			add_action('acf_to_content/update_value', array($this, 'pmxi_acf_custom_field'), 999999, 3);
 			add_action('acf_to_content/save_post', array($this, 'save_post'), 999999, 1);
 			
-			add_filter('acf_to_content/field_filter_hooks', array($this, 'get_field_filter_hooks'), 10, 2);
-			add_action('acf_to_content/add_field_filter_hook', array($this, 'add_field_filter_hook'), 10, 2);
-			
 		} // end public function __construct
-		
-		public function get_field_filter_hooks($hooks, $type) {
-			$hook = false;
-			if (isset($this->field_types[$type]) && isset($this->field_types[$types]['filter_hooks'])) {
-				$hook = $this->field_types[$types]['filter_hooks'];
-			}
-			return $hook;
-		} // end public function get_field_filter_hooks
 		
 		public function pmxi_acf_custom_field($value, $post_id, $field_name) {
 			$values = array(
@@ -216,7 +205,7 @@
 			
 			
 			if (!isset($field['to_content']) || !$field['to_content']) {
-				// this field is not being added to content setting
+				// this field is not being added to content by setting
 				return $value;
 			}
 			
