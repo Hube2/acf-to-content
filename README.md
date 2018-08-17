@@ -120,8 +120,8 @@ The following is an example for all fields
 add_filter('acf-to-content/custom-process', 'my_to_content_process', 10, 4);
 function ($to_content, $value, $post_id, $field) {
   /*
-		do whatever you want to set the value of $to_content and return it
-	*/
-	return $to_content;
+    do whatever you want to set the value of $to_content and return it
+  */
+  return $to_content;
 }
 ```
