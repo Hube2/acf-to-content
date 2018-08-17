@@ -11,7 +11,7 @@
 		
 		public function __construct() {
 		
-			add_filter('acf-to-content/process', array($this, 'process'), 10, 4);
+			add_filter('acf_to_content/process', array($this, 'process'), 10, 4);
 		
 		} // end public function __construct
 		
@@ -23,7 +23,12 @@
 			if (!in_array($handler, $active_handlers)) {
 				return $value;
 			}
-			$value = $this->{$handler}($value);
+			$to_content = $value;
+			if (method_exists($this, $handler)) {
+				$value = $this->{$handler}($value);
+			} else {
+				
+			}
 			return $value;
 		} // end public function process
 		

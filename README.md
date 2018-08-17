@@ -100,10 +100,10 @@ do_action('acf_to_content/save_post', $post_id);
 This plugin does not manage all field types. Basically it only does text based fields at the moment. However,
 you can make it store any value to the_content by building your own filter for any field. You can filter all 
 fields, by field type, field key or field name. Here are the hooks
-* all fields: `"acf-to-content/custom-process"`
-* by field type: `"acf-to-content/custom-process/type=$field['type']"`
-* all field name: `"acf-to-content/custom-process/name=.$field['name']"`
-* by field key: `"acf-to-content/custom-process/key='.$field['key']"`
+* all fields: `"acf_to_content/custom_process"`
+* by field type: `"acf_to_content/custom_process/type=$field['type']"`
+* all field name: `"acf_to_content/custom_process/name=.$field['name']"`
+* by field key: `"acf_to_content/custom_process/key='.$field['key']"`
 
 The arguments supplied are
 * $to_content: The (STRING) value that you want to insert into the_content
@@ -117,7 +117,7 @@ override any filters built into this plugin, now and in the future.
 
 The following is an example for all fields
 ```
-add_filter('acf-to-content/custom-process', 'my_to_content_process', 10, 4);
+add_filter('acf_to_content/custom_process', 'my_to_content_process', 10, 4);
 function ($to_content, $value, $post_id, $field) {
   /*
     do whatever you want to set the value of $to_content and return it

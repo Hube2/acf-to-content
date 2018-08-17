@@ -45,54 +45,54 @@
 		private $field_types = array(
 			
 			/* BASIC */
-			'text' => array('handling' => 'text', 'filter_hook' => false),
-			'textarea' => array('handling' => 'text', 'filter_hook' => false),
-			//'number' => array('handling' => 'text', 'filter_hook' => false),
-			//'range' => array('handling' => 'text', 'filter_hook' => false), // just a number field ?
-			//'email' => array('handling' => 'text', 'filter_hook' => false),
-			//'url' => array('handling' => 'text', 'filter_hook' => false),
+			'text' => array('handling' => 'text', 'filter_hooks' => false),
+			'textarea' => array('handling' => 'text', 'filter_hooks' => false),
+			//'number' => array('handling' => 'text', 'filter_hooks' => false),
+			//'range' => array('handling' => 'text', 'filter_hooks' => false), // just a number field ?
+			//'email' => array('handling' => 'text', 'filter_hooks' => false),
+			//'url' => array('handling' => 'text', 'filter_hooks' => false),
 			
 			/* CONTENT */
-			//'image' => array('handling' => '', 'filter_hook' => false),
-			//'file' => array('handling' => '', 'filter_hook' => false),
-			'wysiwyg' => array('handling' => 'text', 'filter_hook' => false),
-			//'oembed' => array('handling' => '', 'filter_hook' => false),
-			//'gallery' => array('handling' => '', 'filter_hook' => false),
-			'medium_editor' => array('handling' => 'text', 'filter_hook' => false),
+			//'image' => array('handling' => '', 'filter_hooks' => false),
+			//'file' => array('handling' => '', 'filter_hooks' => false),
+			'wysiwyg' => array('handling' => 'text', 'filter_hooks' => false),
+			//'oembed' => array('handling' => '', 'filter_hooks' => false),
+			//'gallery' => array('handling' => '', 'filter_hooks' => false),
+			'medium_editor' => array('handling' => 'text', 'filter_hooks' => false),
 			
 			/* CHOICE */
-			//'select' => array('handling' => '', 'filter_hook' => false),
-			//'checkbox' => array('handling' => '', 'filter_hook' => false),
-			//'radio' => array('handling' => '', 'filter_hook' => false),
-			//'button_group' => array('handling' => '', 'filter_hook' => false),
-			//'true_false' => array('handling' => '', 'filter_hook' => false),
+			//'select' => array('handling' => '', 'filter_hooks' => false),
+			//'checkbox' => array('handling' => '', 'filter_hooks' => false),
+			//'radio' => array('handling' => '', 'filter_hooks' => false),
+			//'button_group' => array('handling' => '', 'filter_hooks' => false),
+			//'true_false' => array('handling' => '', 'filter_hooks' => false),
 			
 			/* RELATIONAL */
-			//'link' => array('handling' => '', 'filter_hook' => false),
-			//'post_object' => array('handling' => '', 'filter_hook' => false),
-			//'page_link' => array('handling' => '', 'filter_hook' => false),
-			//'relaitionship' => array('handling' => '', 'filter_hook' => false),
-			//'taxonomy' => array('handling' => '', 'filter_hook' => false),
-			//'user' => array('handling' => '', 'filter_hook' => false),
+			//'link' => array('handling' => '', 'filter_hooks' => false),
+			//'post_object' => array('handling' => '', 'filter_hooks' => false),
+			//'page_link' => array('handling' => '', 'filter_hooks' => false),
+			//'relaitionship' => array('handling' => '', 'filter_hooks' => false),
+			//'taxonomy' => array('handling' => '', 'filter_hooks' => false),
+			//'user' => array('handling' => '', 'filter_hooks' => false),
 			
 			/* JQUERY */
-			//'google_map' => array('handling' => '', 'filter_hook' => false),
-			//'date_picker' => array('handling' => 'date_time', 'filter_hook' => false),
-			//'date_time_picker' => array('handling' => 'date_time', 'filter_hook' => false),
-			//'time_picker' => array('handling' => 'date_time', 'filter_hook' => false),
-			//'color_picker' => array('handling' => '', 'filter_hook' => false),
+			//'google_map' => array('handling' => '', 'filter_hooks' => false),
+			//'date_picker' => array('handling' => 'date_time', 'filter_hooks' => false),
+			//'date_time_picker' => array('handling' => 'date_time', 'filter_hooks' => false),
+			//'time_picker' => array('handling' => 'date_time', 'filter_hooks' => false),
+			//'color_picker' => array('handling' => '', 'filter_hooks' => false),
 			
 			
 			// note that layout fields do not actually store values
 			// this may indicate that sub fields will be processed
-			//'message' => array('handling' => '', 'filter_hook' => false),
-			//'accordion' => array('handling' => '', 'filter_hook' => false),
-			//'accordion' => array('handling' => '', 'filter_hook' => false),
-			//'tab' => array('handling' => '', 'filter_hook' => false),
-			//'group' => array('handling' => '', 'filter_hook' => false),
-			//'repeater' => array('handling' => 'repeater', 'filter_hook' => false),
-			//'flexible_content' => array('handling' => 'flexible_content', 'filter_hook' => false),
-			//'clone' => array('handling' => 'clone', 'filter_hook' => false)
+			//'message' => array('handling' => '', 'filter_hooks' => false),
+			//'accordion' => array('handling' => '', 'filter_hooks' => false),
+			//'accordion' => array('handling' => '', 'filter_hooks' => false),
+			//'tab' => array('handling' => '', 'filter_hooks' => false),
+			//'group' => array('handling' => '', 'filter_hooks' => false),
+			//'repeater' => array('handling' => 'repeater', 'filter_hooks' => false),
+			//'flexible_content' => array('handling' => 'flexible_content', 'filter_hooks' => false),
+			//'clone' => array('handling' => 'clone', 'filter_hooks' => false)
 		);
 		
 		public function __construct() {
@@ -101,7 +101,7 @@
 			add_action('acf/update_value', array($this, 'update_value'), 999999, 3);
 			
 			// allow filtering of the field types to copy to post_content
-			add_filter('acf-to-content/field-types', array($this, 'get_field_types'), 1, 1);
+			add_filter('acf_to_content/field_types', array($this, 'get_field_types'), 1, 1);
 			
 			// after acf saves values, copy to post_content
 			add_action('acf/save_post', array($this, 'save_post'), 999999);
@@ -120,7 +120,18 @@
 			add_action('acf_to_content/update_value', array($this, 'pmxi_acf_custom_field'), 999999, 3);
 			add_action('acf_to_content/save_post', array($this, 'save_post'), 999999, 1);
 			
+			add_filter('acf_to_content/field_filter_hooks', array($this, 'get_field_filter_hooks'), 10, 2);
+			add_action('acf_to_content/add_field_filter_hook', array($this, 'add_field_filter_hook'), 10, 2);
+			
 		} // end public function __construct
+		
+		public function get_field_filter_hooks($hooks, $type) {
+			$hook = false;
+			if (isset($this->field_types[$type]) && isset($this->field_types[$types]['filter_hooks'])) {
+				$hook = $this->field_types[$types]['filter_hooks'];
+			}
+			return $hook;
+		} // end public function get_field_filter_hooks
 		
 		public function pmxi_acf_custom_field($value, $post_id, $field_name) {
 			$values = array(
@@ -188,13 +199,13 @@
 			// allow 3rd party filtering of any field
 			$to_content = false;
 			// all fields
-			$to_content = apply_filters('acf-to-content/custom-process', $to_content, $value, $post_id, $field);
+			$to_content = apply_filters('acf_to_content/custom_process', $to_content, $value, $post_id, $field);
 			// by field type
-			$to_content = apply_filters('acf-to-content/custom-process/type='.$field['type'], $to_content, $value, $post_id, $field);
+			$to_content = apply_filters('acf_to_content/custom_process/type='.$field['type'], $to_content, $value, $post_id, $field);
 			// by field name
-			$to_content = apply_filters('acf-to-content/custom-process/name='.$field['name'], $to_content, $value, $post_id, $field);
+			$to_content = apply_filters('acf_to_content/custom_process/name='.$field['name'], $to_content, $value, $post_id, $field);
 			// by field key
-			$to_content = apply_filters('acf-to-content/custom-process/key='.$field['key'], $to_content, $value, $post_id, $field);
+			$to_content = apply_filters('acf_to_content/custom_process/key='.$field['key'], $to_content, $value, $post_id, $field);
 			if ($to_content) {
 				// filtered by a 3rd party filter
 				// set content and skip built in processing
@@ -212,7 +223,7 @@
 			// process content and add it to $this->content[$post_id]
 			
 			// get field types that allow processing and the type of processing they use
-			$filtered_types = apply_filters('acf-to-content/field-types', array());
+			$filtered_types = apply_filters('acf_to_content/field_types', array());
 			
 			if (isset($filtered_types[$field['type']])) {
 				$handling = $filtered_types[$field['type']]['handling'];
@@ -225,7 +236,7 @@
 				$this->content[$post_id] = '';
 			}
 			
-			$this->content[$post_id] .= ' '.apply_filters('acf-to-content/process', $value, $post_id, $field, $handling);
+			$this->content[$post_id] .= ' '.apply_filters('acf_to_content/process', $value, $post_id, $field, $handling);
 			$this->do_updates[$post_id] = $post_id;
 			
 			return $value;

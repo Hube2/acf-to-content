@@ -15,7 +15,7 @@
 		
 		public function add_actions() {
 			$acf_types = acf_get_field_types();
-			$filtered_types = apply_filters('acf-to-content/field-types', array());
+			$filtered_types = apply_filters('acf_to_content/field_types', array());
 			// active handlings
 			global $acf_to_post_content;
 			$active_handlers = $acf_to_post_content->get_active_handlings();
