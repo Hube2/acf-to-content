@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.0.2
+		Version: 1.1.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -43,40 +43,56 @@
 		// not all of the standard field types will allow
 		// storing in content
 		private $field_types = array(
-			'text' => array('handling' => 'text'),
-			'textarea' => array('handling' => 'text'),
-			'medium_editor' => array('handling' => 'text'),
-			//'number' => array('handling' => 'text'),
-			//'email' => array('handling' => 'text'),
-			//'url' => array('handling' => 'text'),
-			'wysiwyg' => array('handling' => 'text'),
-			//'oembed' => array('handling' => ''),
-			//'image' => array('handling' => 'image'),
-			//'file' => array('handling' => 'file'),
-			//'gallery' => array('handling' => 'image'),
-			//'select' => array('handling' => 'choice'),
-			//'checkbox' => array('handling' => 'choice'),
-			//'radio' => array('handling' => 'choice'),
-			//'true_false' => array('handling' => ''),
-			//'post_object' => array('handling' => 'relationship'),
-			//'page_link' => array('handling' => 'page_link'),
-			//'relaitionship' => array('handling' => 'relationship'),
-			//'taxonomy' => array('handling' => 'taxonomy'),
-			//'user' => array('handling' => 'user'),
-			//'google_map' => array('handling' => 'google_map'),
-			//'date_picker' => array('handling' => 'date_time'),
-			//'date_time_picker' => array('handling' => 'date_time'),
-			//'time_picker' => array('handling' => 'date_time'),
-			//'color_picker' => array('handling' => ''),
-			//'message' => array('handling' => ''),
-			//'tab' => array('handling' => ''),
+			
+			/* BASIC */
+			'text' => array('handling' => 'text', 'filter_hook' => false),
+			'textarea' => array('handling' => 'text', 'filter_hook' => false),
+			//'number' => array('handling' => 'text', 'filter_hook' => false),
+			//'range' => array('handling' => 'text', 'filter_hook' => false), // just a number field ?
+			//'email' => array('handling' => 'text', 'filter_hook' => false),
+			//'url' => array('handling' => 'text', 'filter_hook' => false),
+			
+			/* CONTENT */
+			//'image' => array('handling' => '', 'filter_hook' => false),
+			//'file' => array('handling' => '', 'filter_hook' => false),
+			'wysiwyg' => array('handling' => 'text', 'filter_hook' => false),
+			//'oembed' => array('handling' => '', 'filter_hook' => false),
+			//'gallery' => array('handling' => '', 'filter_hook' => false),
+			'medium_editor' => array('handling' => 'text', 'filter_hook' => false),
+			
+			/* CHOICE */
+			//'select' => array('handling' => '', 'filter_hook' => false),
+			//'checkbox' => array('handling' => '', 'filter_hook' => false),
+			//'radio' => array('handling' => '', 'filter_hook' => false),
+			//'button_group' => array('handling' => '', 'filter_hook' => false),
+			//'true_false' => array('handling' => '', 'filter_hook' => false),
+			
+			/* RELATIONAL */
+			//'link' => array('handling' => '', 'filter_hook' => false),
+			//'post_object' => array('handling' => '', 'filter_hook' => false),
+			//'page_link' => array('handling' => '', 'filter_hook' => false),
+			//'relaitionship' => array('handling' => '', 'filter_hook' => false),
+			//'taxonomy' => array('handling' => '', 'filter_hook' => false),
+			//'user' => array('handling' => '', 'filter_hook' => false),
+			
+			/* JQUERY */
+			//'google_map' => array('handling' => '', 'filter_hook' => false),
+			//'date_picker' => array('handling' => 'date_time', 'filter_hook' => false),
+			//'date_time_picker' => array('handling' => 'date_time', 'filter_hook' => false),
+			//'time_picker' => array('handling' => 'date_time', 'filter_hook' => false),
+			//'color_picker' => array('handling' => '', 'filter_hook' => false),
 			
 			
 			// note that layout fields do not actually store values
 			// this may indicate that sub fields will be processed
-			//'repeater' => array('handling' => 'repeater'),
-			//'flexible_content' => array('handling' => 'flexible_content'),
-			//'clone' => array('handling' => 'clone')
+			//'message' => array('handling' => '', 'filter_hook' => false),
+			//'accordion' => array('handling' => '', 'filter_hook' => false),
+			//'accordion' => array('handling' => '', 'filter_hook' => false),
+			//'tab' => array('handling' => '', 'filter_hook' => false),
+			//'group' => array('handling' => '', 'filter_hook' => false),
+			//'repeater' => array('handling' => 'repeater', 'filter_hook' => false),
+			//'flexible_content' => array('handling' => 'flexible_content', 'filter_hook' => false),
+			//'clone' => array('handling' => 'clone', 'filter_hook' => false)
 		);
 		
 		public function __construct() {
@@ -164,13 +180,38 @@
 				return $value;
 			}
 			
+			// never allow password fields
+			if ($field['type'] == 'password') {
+				return $value;
+			}
+			
+			// allow 3rd party filtering of any field
+			$to_content = false;
+			// all fields
+			$to_content = apply_filters('acf-to-content/custom-process', $to_content, $value, $post_id, $field);
+			// by field type
+			$to_content = apply_filters('acf-to-content/custom-process/type='.$field['type'], $to_content, $value, $post_id, $field);
+			// by field name
+			$to_content = apply_filters('acf-to-content/custom-process/name='.$field['name'], $to_content, $value, $post_id, $field);
+			// by field key
+			$to_content = apply_filters('acf-to-content/custom-process/key='.$field['key'], $to_content, $value, $post_id, $field);
+			if ($to_content) {
+				// filtered by a 3rd party filter
+				// set content and skip built in processing
+				$this->content[$post_id] .= ' '.$to_content;
+				$this->do_updates[$post_id] = $post_id;
+				return $value;
+			}
+			
+			
 			if (!isset($field['to_content']) || !$field['to_content']) {
-				// this field is not being added to content
-				// we can skip the rest
+				// this field is not being added to content setting
 				return $value;
 			}
 			
 			// process content and add it to $this->content[$post_id]
+			
+			// get field types that allow processing and the type of processing they use
 			$filtered_types = apply_filters('acf-to-content/field-types', array());
 			
 			if (isset($filtered_types[$field['type']])) {
@@ -183,7 +224,8 @@
 			if (!isset($this->content[$post_id])) {
 				$this->content[$post_id] = '';
 			}
-			$this->content[$post_id] .= ' '.apply_filters('acf-to-content/process', $value, $handling);
+			
+			$this->content[$post_id] .= ' '.apply_filters('acf-to-content/process', $value, $post_id, $field, $handling);
 			$this->do_updates[$post_id] = $post_id;
 			
 			return $value;

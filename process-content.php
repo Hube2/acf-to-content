@@ -11,11 +11,11 @@
 		
 		public function __construct() {
 		
-			add_filter('acf-to-content/process', array($this, 'process'), 1, 2);
+			add_filter('acf-to-content/process', array($this, 'process'), 10, 4);
 		
 		} // end public function __construct
 		
-		public function process($value, $handler) {
+		public function process($value, $post_id, $field, $handler) {
 			
 			global $acf_to_post_content;
 			
