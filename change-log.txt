@@ -1,3 +1,6 @@
 
+= 1.1.1 =
+* renamed all hooks for consistency
+
 = 1.1.0 =
 * Added 3rd party filters to allow custom filtering of any type of field
