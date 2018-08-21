@@ -29,21 +29,24 @@ I find they are needed and have the time to add them.
 You must specify by setting the "To Content" setting of the fields when adding or editing them in ACF.
 
 ## How does it work
-Every field that is saved by ACF triggers the action `acf/update_value`. This cause any value from a field 
-to be stored. When ACF is finsished saveing the post the `acf/save_post` action is triggerd. This triggers 
-this plugin to add any stored values for the post to "post_content"
+Every field that is saved by ACF triggers the action `acf/update_value`. This causes any value from a field 
+with the "To Content" setting on to be stored into comment delimeted block along with the post content. When 
+ACF is finsished saveing the post the `acf/save_post` action is triggerd. This triggers this plugin to add any 
+stored values for the post to "post_content"
 
 ## Works with WP All Import ACF Add On
-This plugin also includes all the neccessary integration to work with WP All Import and the ACF Add On
+This plugin also includes all the neccessary integration to work with WP All Import and the ACF Add On. The reason 
+this is included is that this is the plugin that I use for imports. To integrate this with other plugins that can 
+update ACF field values see the next section.
 
 ## Integration w/Other plugins
 
 I have added filters to allow you to integrate this with other plugins that create posts 
 or update ACF field values.
 
-Before attempting to create code to integrate this is some other way the first thing you need to understand is 
+Before attempting to create code to integrate this in some other way the first thing you need to understand is 
 the process that you must use. The only field values that will be added to the post_content for searching are 
-values currently being updated. This means that you must update all fields that need to be added to the 
+values currently being updated by ACF. This means that you must update all fields that need to be added to the 
 post_content.
 
 Let's look at an example. Suppose you have two text fields and you want both of these fields to be added 
@@ -64,7 +67,8 @@ $value = get_field('second_text_field', $post_id);
 update_value('second_text_field', $post_id);
 ```
 In the above example, calling `update_field()` tells ACF to update the value and this triggers this plugin to 
-add the value to the content that will be added to the post_content. Once you have updated all of the values then you must trigger this plugin to store that content. A special action hook has been added to this plugin for this 
+add the value to the content that will be added to the post_content. Once you have updated all of the values then 
+you must trigger this plugin to store that content. A special action hook has been added to this plugin for this 
 purpose.
 ```
 do_action('acf_to_content/save_post', $post_id);
@@ -75,12 +79,12 @@ do_action('acf_to_content/save_post', $post_id);
 You can also update values using a hook. Using this hook will not cause ACF to update the value and will 
 instead cause this plugin to add the value that will be added to the post_content. Basically it's just telling 
 this pluging that a value needs to be stored
-`
+```
 $value = apply_filters('acf_to_content/update_value', $value, $post_id, $field_name);
-`
+```
 
-$field_name can be the field key or the field name. Please note that the use of field key VS field name follows 
-the same rules as those for ACF. If the field does not already have a value then you must use the field key. 
+$field_name can be the field key or the field name. *Please note that the use of field key VS field name follows 
+the same rules as those for ACF.* If the field does not already have a value then you must use the field key. 
 Again, this does not cause ACF to actually update the value. This can be used to replace the code in the first example.
 ```
 // the first text field you want to update
@@ -102,12 +106,12 @@ you can make it store any value to the_content by building your own filter for a
 fields, by field type, field key or field name. Here are the hooks
 * all fields: `"acf_to_content/custom_process"`
 * by field type: `"acf_to_content/custom_process/type=$field['type']"`
-* all field name: `"acf_to_content/custom_process/name=.$field['name']"`
+* by field name: `"acf_to_content/custom_process/name=.$field['name']"`
 * by field key: `"acf_to_content/custom_process/key='.$field['key']"`
 
 The arguments supplied are
-* $to_content: The (STRING) value that you want to insert into the_content
-* $value: The values of the ACF field being saved
+* $to_content: The (STRING) value that you want to insert into the_content (default value is `false`)
+* $value: The original value(s) of the ACF field being saved
 * $post_id: The post ID of the post being saved
 * $field: The ACF field array
 
