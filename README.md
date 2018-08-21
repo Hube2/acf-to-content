@@ -1,5 +1,5 @@
-# acf-to-content
-Add ACF field content to the post_content column for searching
+# ACF to Content
+Add ACF field content to the post_content column for easier and more efficiient searching of ACF fields.
 
 ## What is this plugin for?
 
