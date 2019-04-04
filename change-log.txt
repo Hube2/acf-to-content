@@ -1,4 +1,8 @@
 
+= 1.2.0 =
+* Corrected issue with getting ACF field types bacause of change in ACF
+* Do not remove content added to post_content when generating excerpt
+
 = 1.1.1 =
 * renamed all hooks for consistency
 
