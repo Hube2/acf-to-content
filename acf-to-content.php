@@ -240,6 +240,9 @@
 		} // end public function get_active_handlings
 		
 		public function remove_acf_content($content) {
+			if (doing_filter('get_the_excerpt')) {
+				return $content;
+			}
 			return trim(preg_replace('#<!-- START SSI ACF TO CONTENT.*END SSI ACF TO CONTENT -->#is', 
 															'', $content));
 		} // end public function remove_content
