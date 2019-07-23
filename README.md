@@ -31,16 +31,16 @@ good post excerpts to clients, but showing ACF content that is added is better t
 ## Field Types Included
 
 * Text Based Fields
- * Text
- * Text Area
- * Number
- * Range
- * Wysiwyg Editor
+  * Text
+  * Text Area
+  * Number
+  * Range
+  * Wysiwyg Editor
 * Choice Fields: allow you to choose to store the label, value, or both for any selected choice
- * Select
- * Checkbox
- * Radio Button
- * Radio Group
+  * Select
+  * Checkbox
+  * Radio Button
+  * Radio Group
 
 You must specify by setting the "To Content" setting of the fields when adding or editing them in ACF.
 
