@@ -35,7 +35,7 @@
 		
 		// this is an array of fucntion names that match
 		// the macth values in $field_types => $field_type => 'handling'
-		private $active_handlings = array('text');
+		private $active_handlings = array('text', 'choice');
 		
 		// this is a list of known field types 
 		// that will be allowed
@@ -47,8 +47,8 @@
 			/* BASIC */
 			'text' => array('handling' => 'text', 'filter_hooks' => false),
 			'textarea' => array('handling' => 'text', 'filter_hooks' => false),
-			//'number' => array('handling' => 'text', 'filter_hooks' => false),
-			//'range' => array('handling' => 'text', 'filter_hooks' => false), // just a number field ?
+			'number' => array('handling' => 'text', 'filter_hooks' => false),
+			'range' => array('handling' => 'text', 'filter_hooks' => false), // just a number field ?
 			//'email' => array('handling' => 'text', 'filter_hooks' => false),
 			//'url' => array('handling' => 'text', 'filter_hooks' => false),
 			
@@ -61,10 +61,10 @@
 			'medium_editor' => array('handling' => 'text', 'filter_hooks' => false),
 			
 			/* CHOICE */
-			//'select' => array('handling' => '', 'filter_hooks' => false),
-			//'checkbox' => array('handling' => '', 'filter_hooks' => false),
-			//'radio' => array('handling' => '', 'filter_hooks' => false),
-			//'button_group' => array('handling' => '', 'filter_hooks' => false),
+			'select' => array('handling' => 'choice', 'filter_hooks' => false),
+			'checkbox' => array('handling' => 'choice', 'filter_hooks' => false),
+			'radio' => array('handling' => 'choice', 'filter_hooks' => false),
+			'button_group' => array('handling' => 'choice', 'filter_hooks' => false),
 			//'true_false' => array('handling' => '', 'filter_hooks' => false),
 			
 			/* RELATIONAL */
@@ -221,6 +221,7 @@
 				// no handling set for this field type
 				return $value;
 			}
+			// initialize content for this post ID
 			if (!isset($this->content[$post_id])) {
 				$this->content[$post_id] = '';
 			}

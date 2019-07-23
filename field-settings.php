@@ -53,6 +53,32 @@
 			$this->all($field);
 		} // end public function text
 		
+		public function choice($field) {
+			$this->all($field);
+			$args = array(
+				'type' => 'radio',
+				'label' => 'To Content Save Format',
+				'instructions' => 'Specify what to copy to content',
+				'name' => 'to_content_format',
+				'_append' => 'to_content',
+				'choices' => array(
+					'label' => 'Label',
+					'value' => 'Value',
+					'both' => 'Both'
+				),
+				'default_value' => 'label',
+				'layout' => 'horizontal',
+				'required' => 0,
+				'allow_null' => 0,
+				'wrapper' => array(
+					'width' => '',
+					'class' => 'acf-to-content-format',
+					'id' => ''
+				)
+			);
+			acf_render_field_setting($field, $args, false);
+		} // end public function choice
+		
 	} // end class acf_to_post_content_field_settings
 	
 ?>
