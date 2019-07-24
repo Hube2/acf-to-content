@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.2.0
+		Version: 1.4.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -35,7 +35,7 @@
 		
 		// this is an array of fucntion names that match
 		// the macth values in $field_types => $field_type => 'handling'
-		private $active_handlings = array('text', 'choice');
+		private $active_handlings = array('text', 'choice', 'taxonomy');
 		
 		// this is a list of known field types 
 		// that will be allowed
@@ -72,7 +72,7 @@
 			//'post_object' => array('handling' => '', 'filter_hooks' => false),
 			//'page_link' => array('handling' => '', 'filter_hooks' => false),
 			//'relaitionship' => array('handling' => '', 'filter_hooks' => false),
-			//'taxonomy' => array('handling' => '', 'filter_hooks' => false),
+			'taxonomy' => array('handling' => 'taxonomy', 'filter_hooks' => false),
 			//'user' => array('handling' => '', 'filter_hooks' => false),
 			
 			/* JQUERY */

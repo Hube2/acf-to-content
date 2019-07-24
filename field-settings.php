@@ -53,12 +53,38 @@
 			$this->all($field);
 		} // end public function text
 		
+		public function taxonomy($field) {
+			$this->all($field);
+			$args = array(
+				'type' => 'checkbox',
+				'label' => '',
+				'instructions' => '',
+				'name' => 'to_content_format',
+				'_append' => 'to_content',
+				'choices' => array(
+					'name' => 'Name',
+					'slug' => 'Slug',
+					'description' => 'Description'
+				),
+				'default_value' => 'name',
+				'layout' => 'horizontal',
+				'required' => 0,
+				'allow_null' => 0,
+				'wrapper' => array(
+					'width' => '',
+					'class' => 'acf-to-content-format',
+					'id' => ''
+				)
+			);
+			acf_render_field_setting($field, $args, false);
+		} // end public function taxonomy
+		
 		public function choice($field) {
 			$this->all($field);
 			$args = array(
 				'type' => 'radio',
-				'label' => 'To Content Save Format',
-				'instructions' => 'Specify what to copy to content',
+				'label' => '',
+				'instructions' => '',
 				'name' => 'to_content_format',
 				'_append' => 'to_content',
 				'choices' => array(
