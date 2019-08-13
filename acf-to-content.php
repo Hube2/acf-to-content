@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.4.0
+		Version: 1.4.1
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -177,6 +177,11 @@
 			
 			// this only works on posts
 			if (!is_numeric($post_id)) {
+				return $value;
+			}
+			
+			$post_type = get_post_type($post_id);
+			if ($post_type == 'acf-field' || $post_type == 'acf-field-group') {
 				return $value;
 			}
 			

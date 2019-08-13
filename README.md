@@ -22,10 +22,10 @@ never look at the content in text mode.
 
 There is on instance when this content will be visible and that is when displaying an automatically
 generated post excerpt. The reason for this is that I do not use "post_content" for anything at this point.
-Do to the new block editor I have decided to replace all WP editor fields, both classic and block editor, 
+Do to the new block editor (~~guberbug~~gutenberg) I have decided to replace all WP editor fields, both classic and block editor, 
 with ACF WYSIWYG fields. This means that the only thing that is in "post_content" are ACF field values that
 I've chosen to put there. This causes and issue when displaying excerpts on pages like the search results
-page because the content really contains nothing. If is a good idea to explain the importance of creating
+page because the content really contains nothing. It is a good idea to explain the importance of creating
 good post excerpts to clients, but showing ACF content that is added is better than showing nothing at all.
 
 ## Field Types Included
@@ -41,6 +41,7 @@ good post excerpts to clients, but showing ACF content that is added is better t
   * Checkbox
   * Radio Button
   * Radio Group
+* Taxonomy Field: allows term name, slug and descirption
 
 You must specify by setting the "To Content" setting of the fields when adding or editing them in ACF.
 
