@@ -41,7 +41,7 @@ good post excerpts to clients, but showing ACF content that is added is better t
   * Checkbox
   * Radio Button
   * Radio Group
-* Taxonomy Field: allows term name, slug and descirption
+* Taxonomy Field: allows term name, slug and descirption. Can choose multiple, defaults to term name.
 
 You must specify by setting the "To Content" setting of the fields when adding or editing them in ACF.
 
