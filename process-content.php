@@ -22,10 +22,28 @@
 			$active_handlers = $acf_to_post_content->get_active_handlings();
 			if (in_array($handler, $active_handlers) && method_exists($this, $handler)) {
 				$value = $this->{$handler}($value, $post_id, $field);
+			} else {
+				$value = $this->stringify($value);
 			}
 			
 			return wp_strip_all_tags($value, true);
 		} // end public function process
+		
+		private function stringify($input) {
+			$return = '';
+			if (is_array($input) || is_object($input)) {
+				$list = array();
+				foreach ($input as $value) {
+					$list[] = $this->stringify($value);
+				}
+				if (count($list)) {
+					$return = implode(' ', $list);
+				}
+			} else {
+				$return = $input;
+			}
+			return $return;
+		} // end private function stringify
 		
 		private function text($value, $post_id, $field) {
 			// not doing anything now, may want to do something later, but it's just a text value anyway
