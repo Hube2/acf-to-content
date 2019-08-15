@@ -83,6 +83,50 @@
 			return $return;
 		} // end private function taxonomy
 		
+		private function post_relationship($value, $post_id, $field) {
+			if (empty($value)) {
+				return $value;
+			}
+			$posts = acf_get_array($value);
+			$return = '';
+			$items = array();
+			$format = array('post_title');
+			if (!empty($field['to_content_format'])) {
+				$format = $field['to_content_format'];
+			}
+			if (count($posts)) {
+				foreach ($value as $post_id) {
+					$post = get_post($post_id);
+					foreach ($format as $what) {
+						switch ($what) {
+							case 'post_content':
+								$post_content = apply_filters('acf_to_content/remove_acf_content', $post->post_content);
+								if (!empty($post_content)) {
+									$items[] = $post_content;
+								}
+								break;
+							case 'acf_content':
+								$acf_content = apply_filters('acf_to_content/get_acf_content', $post->post_content);
+								if (!empty($post_content)) {
+									$items[] = $post_content;
+								}
+								break;
+							case 'post_title':
+							default: 
+								if (!empty($post->post_title)) {
+									$items[] = $post->{$what};
+								}
+								break;
+						} // end switch
+					} // end foreach format
+				} // end foreach post
+			} // end if posts
+			if (count($items)) {
+				$return = implode(' ', $items);
+			}
+			return $return;
+		} // end private function post_relationship
+		
 		private function choice($value, $post_id, $field) {
 			if (empty($value) || !isset($field['choices']) || !count($field['choices'])) {
 				return $value;

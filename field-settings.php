@@ -53,6 +53,32 @@
 			$this->all($field);
 		} // end public function text
 		
+		public function post_relationship($field) {
+			$this->all($field);
+			$args = array(
+				'type' => 'checkbox',
+				'label' => '',
+				'instructions' => '',
+				'name' => 'to_content_format',
+				'_append' => 'to_content',
+				'choices' => array(
+					'post_title' => 'Title',
+					'post_content' => 'Content',
+					'acf_content' => 'ACF to Content'
+				),
+				'default_value' => 'post_title',
+				'layout' => 'horizontal',
+				'required' => 0,
+				'allow_null' => 0,
+				'wrapper' => array(
+					'width' => '',
+					'class' => 'acf-to-content-format',
+					'id' => ''
+				)
+			);
+			acf_render_field_setting($field, $args, false);
+		} // end public function post_relationship
+		
 		public function taxonomy($field) {
 			$this->all($field);
 			$args = array(

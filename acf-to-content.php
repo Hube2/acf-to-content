@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.4.1
+		Version: 1.5.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -35,7 +35,7 @@
 		
 		// this is an array of fucntion names that match
 		// the macth values in $field_types => $field_type => 'handling'
-		private $active_handlings = array('text', 'choice', 'taxonomy');
+		private $active_handlings = array('text', 'choice', 'taxonomy', 'post_relationship');
 		
 		// this is a list of known field types 
 		// that will be allowed
@@ -69,9 +69,9 @@
 			
 			/* RELATIONAL */
 			//'link' => array('handling' => '', 'filter_hooks' => false),
-			//'post_object' => array('handling' => '', 'filter_hooks' => false),
+			'post_object' => array('handling' => 'post_relationship', 'filter_hooks' => false),
 			//'page_link' => array('handling' => '', 'filter_hooks' => false),
-			//'relaitionship' => array('handling' => '', 'filter_hooks' => false),
+			'relationship' => array('handling' => 'post_relationship', 'filter_hooks' => false),
 			'taxonomy' => array('handling' => 'taxonomy', 'filter_hooks' => false),
 			//'user' => array('handling' => '', 'filter_hooks' => false),
 			
@@ -119,6 +119,9 @@
 			// custom filters/actions for others to use
 			add_action('acf_to_content/update_value', array($this, 'pmxi_acf_custom_field'), 999999, 3);
 			add_action('acf_to_content/save_post', array($this, 'save_post'), 999999, 1);
+			
+			add_filter('acf_to_content/remove_acf_content', array($this, 'remove_acf_content', 10, 1));
+			add_filter('acf_to_content/get_acf_content', array($this, 'return_acf_content', 10, 1));
 			
 		} // end public function __construct
 		
@@ -252,6 +255,13 @@
 			return trim(preg_replace('#<!-- START SSI ACF TO CONTENT.*END SSI ACF TO CONTENT -->#is', 
 															'', $content));
 		} // end public function remove_content
+		
+		public function return_acf_content($content) {
+			if (preg_match('#<!-- START SSI ACF TO CONTENT -->\s*(.*)\s*<!-- END SSI ACF TO CONTENT -->#is', $content, $matches)) {
+				return $matches[1];
+			}
+			return '';
+		} // end public function return_acf_content
 		
 	} // end class acf_to_post_content
 	

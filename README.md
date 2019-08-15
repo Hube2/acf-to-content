@@ -42,6 +42,9 @@ good post excerpts to clients, but showing ACF content that is added is better t
   * Radio Button
   * Radio Group
 * Taxonomy Field: allows term name, slug and descirption. Can choose multiple, defaults to term name.
+* Post Relationship: allows title, content (content with any acf content added by this plugin removed) or acf content (content added to the related post by this plugin). Can choose mulitple, defaults to title.
+  * Post Object
+  * Relationship
 
 You must specify by setting the "To Content" setting of the fields when adding or editing them in ACF.
 
