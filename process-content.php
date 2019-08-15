@@ -10,22 +10,17 @@
 	class acf_to_post_content_process {
 		
 		public function __construct() {
-		
 			add_filter('acf_to_content/process', array($this, 'process'), 10, 4);
-		
 		} // end public function __construct
 		
 		public function process($value, $post_id, $field, $handler) {
-			
 			global $acf_to_post_content;
-			
 			$active_handlers = $acf_to_post_content->get_active_handlings();
 			if (in_array($handler, $active_handlers) && method_exists($this, $handler)) {
 				$value = $this->{$handler}($value, $post_id, $field);
 			} else {
 				$value = $this->stringify($value);
 			}
-			
 			return wp_strip_all_tags($value, true);
 		} // end public function process
 		
@@ -53,7 +48,7 @@
 		
 		private function taxonomy($value, $post_id, $field) {
 			if (empty($value)) {
-				return $value;
+				return '';
 			}
 			$value = acf_get_array($value);
 			$args = array(
@@ -85,7 +80,7 @@
 		
 		private function post_relationship($value, $post_id, $field) {
 			if (empty($value)) {
-				return $value;
+				return '';
 			}
 			$posts = acf_get_array($value);
 			$return = '';
@@ -95,7 +90,7 @@
 				$format = $field['to_content_format'];
 			}
 			if (count($posts)) {
-				foreach ($value as $post_id) {
+				foreach ($posts as $post_id) {
 					$post = get_post($post_id);
 					foreach ($format as $what) {
 						switch ($what) {
@@ -159,7 +154,5 @@
 		} // end private function choice
 		
 	} // end class acf_to_post_content_process
-	
-	
 	
 ?>
