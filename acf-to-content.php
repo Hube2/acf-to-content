@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.5.3
+		Version: 1.5.4
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -209,7 +209,7 @@
 			$to_content = apply_filters('acf_to_content/custom_process/name='.$field['name'], $to_content, $value, $post_id, $field);
 			// by field key
 			$to_content = apply_filters('acf_to_content/custom_process/key='.$field['key'], $to_content, $value, $post_id, $field);
-			if ($to_content) {
+			if ($to_content !== false) {
 				// filtered by a 3rd party filter
 				// set content and skip built in processing
 				$this->content[$post_id] .= ' '.$to_content;
