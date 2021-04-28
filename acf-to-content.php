@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.5.5
+		Version: 1.5.6
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -120,8 +120,8 @@
 			add_action('acf_to_content/update_value', array($this, 'pmxi_acf_custom_field'), 999999, 3);
 			add_action('acf_to_content/save_post', array($this, 'save_post'), 999999, 1);
 			
-			add_filter('acf_to_content/remove_acf_content', array($this, 'remove_acf_content', 10), 1);
-			add_filter('acf_to_content/get_acf_content', array($this, 'return_acf_content', 10), 1);
+			add_filter('acf_to_content/remove_acf_content', array($this, 'remove_acf_content'), 10, 1);
+			add_filter('acf_to_content/get_acf_content', array($this, 'return_acf_content'), 10, 1);
 			
 		} // end public function __construct
 		
