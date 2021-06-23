@@ -41,8 +41,10 @@
 		} // end private function stringify
 		
 		private function text($value, $post_id, $field) {
-			// not doing anything now, may want to do something later, but it's just a text value anyway
-			// may want to strip html at some point, but I don't know
+			// run all shortcodes
+			$value = do_shortcode($value);
+			// remove all html
+			$value = wp_strip_all_tags($value, true);
 			return $value;
 		} // end private function text
 		
