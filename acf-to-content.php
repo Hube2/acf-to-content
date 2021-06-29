@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.6.0
+		Version: 1.7.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -95,7 +95,13 @@
 			//'clone' => array('handling' => 'clone', 'filter_hooks' => false)
 		);
 		
+		private $do_not_process = false;
+		private $processing_off_count = 0;
+		
 		public function __construct() {
+			
+			add_action('acf_to_content/stop_processing', array($this, 'stop_processing'), 10);
+			add_action('acf_to_content/resume_processing', array($this, 'stop_processing'), 10);
 			
 			// run update value on every field
 			add_action('acf/update_value', array($this, 'update_value'), 999999, 3);
@@ -123,7 +129,23 @@
 			add_filter('acf_to_content/remove_acf_content', array($this, 'remove_acf_content'), 10, 1);
 			add_filter('acf_to_content/get_acf_content', array($this, 'return_acf_content'), 10, 1);
 			
+			add_action('acf_to_content/stop_processing', array($this, 'stop_processing'), 10);
+			add_action('acf_to_content/resume_processing', array($this, 'resume_processing'), 10);
+			
 		} // end public function __construct
+		
+		public function stop_processing() {
+			$this->do_not_process = true;
+			$this->processing_off_count++;
+		} // end public function stop_processin
+		
+		public function resume_processing() {
+			$this->processing_off_count--;
+			if ($this->processing_off_count <= 0) {
+				$this->processing_off_count = 0;
+				$this->do_not_process = false;
+			}
+		} // end public function resume_processing
 		
 		public function pmxi_acf_custom_field($value, $post_id, $field_name) {
 			$values = array(
@@ -183,6 +205,10 @@
 		
 		public function update_value($value, $post_id, $field) {
 			// this function is called every time ACF updates a field value
+			
+			if ($this->do_not_process) {
+				return $value;
+			}
 			
 			// this only works on posts
 			if (!is_numeric($post_id)) {
@@ -270,5 +296,3 @@
 		} // end public function return_acf_content
 		
 	} // end class acf_to_post_content
-	
-?>
