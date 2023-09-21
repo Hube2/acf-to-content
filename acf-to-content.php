@@ -100,9 +100,6 @@
 		
 		public function __construct() {
 			
-			add_action('acf_to_content/stop_processing', array($this, 'stop_processing'), 10);
-			add_action('acf_to_content/resume_processing', array($this, 'stop_processing'), 10);
-			
 			// run update value on every field
 			add_action('acf/update_value', array($this, 'update_value'), 999999, 3);
 			
