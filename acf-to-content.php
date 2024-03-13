@@ -5,7 +5,7 @@
 		Plugin URI: https://github.com/Hube2/acf-to-content
 		GitHub Plugin URI: https://github.com/Hube2/acf-to-content
 		Description: Add ACF fields to post_content for search
-		Version: 1.7.0
+		Version: 1.8.0
 		Author: John A. Huebner II
 		Author URI: https://github.com/Hube2
 		
@@ -18,6 +18,7 @@
 	
 	require(dirname(__FILE__).'/field-settings.php');
 	require(dirname(__FILE__).'/process-content.php');
+	require(dirname(__FILE__).'/elementor.php');
 	
 	global $acf_to_post_content;
 	$acf_to_post_content = new acf_to_post_content();
@@ -102,12 +103,13 @@
 			
 			// run update value on every field
 			add_action('acf/update_value', array($this, 'update_value'), 999999, 3);
+			add_action('acf_to_content/save_post/from_meta', array($this, 'update_from_meta'));
 			
 			// allow filtering of the field types to copy to post_content
 			add_filter('acf_to_content/field_types', array($this, 'get_field_types'), 1, 1);
 			
 			// after acf saves values, copy to post_content
-			add_action('acf/save_post', array($this, 'save_post'), 999999);
+			add_action('acf/save_post', array($this, 'save_post'), 999998);
 			
 			// remove added content before displaying on front end of site
 			add_filter('the_content', array($this, 'remove_acf_content'), 1);
@@ -128,6 +130,7 @@
 			
 			add_action('acf_to_content/stop_processing', array($this, 'stop_processing'), 10);
 			add_action('acf_to_content/resume_processing', array($this, 'resume_processing'), 10);
+			
 			
 		} // end public function __construct
 		
@@ -157,15 +160,33 @@
 			return $value;
 		} // end public function pmxi_acf_custom_field
 		
+		private function save_to_meta($post_id, $content) {
+			update_post_meta($post_id, '_acf_to_content', $content);
+		} // end private function save_to_meta
+		
+		public function update_from_meta($post_id) {
+			$content = get_post_meta($post_id, '_acf_to_content', true);
+			if (!empty($content)) {
+				$this->do_updates[$post_id] = $post_id;
+				$this->content[$post_id] = $content;
+				$this->save_post($post_id);
+			}
+		} // end public function update_from_meta
+		
 		public function save_post($post_id) {
 			// this function will add acf content to post content if it exists
 			
 			// test to see if acf values were updated
 			if (!isset($this->do_updates[$post_id])) {
 				// no updates for this post
+				$this->save_to_meta($post_id, '');
 				return;
 			}
+			
 			$this->content[$post_id] = trim($this->content[$post_id]);
+			
+			// store to maybe be used by elementor
+			$this->save_to_meta($post_id, $this->content[$post_id]);
 			
 			$post = get_post($post_id);
 			
@@ -184,19 +205,36 @@
 			$post->post_content = $post_content;
 			
 			// remove this action
-			remove_filter('acf/save_post', array($this, 'save_post'), 999999);
+			remove_filter('acf/save_post', array($this, 'save_post'), 999998);
+			
+			// remove elementor action
+			do_action('acf_to_content/elementor/remove_action');
 			
 			// disable post revisions
-			remove_filter('post_updated', 'wp_save_post_revision', 10);
+			$rev_action_removed = false;
+			if (has_action('post_updated', 'wp_save_post_revision')) {
+				// only remove it if it exists, another plugin may have removed it
+				remove_filter('post_updated', 'wp_save_post_revision', 10);
+				$rev_action_removed = true;
+			}
 			
 			// update post
 			wp_update_post($post);
 			
 			// reenable post revisions
-			add_action('post_updated', 'wp_save_post_revision', 10, 1);
+			if ($rev_action_removed) {
+				// only add the action if it was removed by this action
+				add_action('post_updated', 'wp_save_post_revision', 10, 1);
+			}
+			
+			// re-add elementor action
+			do_action('acf_to_content/elementor/add_action');
 			
 			// re-add this action
-			add_action('acf/save_post', array($this, 'save_post'), 999999);
+			add_action('acf/save_post', array($this, 'save_post'), 999998);
+			
+			unset($this->content[$post_id]);
+			unset($this->do_updates[$post_id]);
 			
 		} // end public function save_post
 		
@@ -264,6 +302,7 @@
 			}
 			
 			$this->content[$post_id] .= ' '.apply_filters('acf_to_content/process', $value, $post_id, $field, $handling);
+			$this->content[$post_id] = trim($this->content[$post_id]);
 			$this->do_updates[$post_id] = $post_id;
 			
 			return $value;
